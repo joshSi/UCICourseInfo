@@ -30,27 +30,20 @@ def getCourseInfo(d):
 	    else:
 	    	depts = getDept(tag)
 	    	#print(depts)
-	new_year = []
 	v = years[0]
-	curent_year = int(v[:4])
-	for i in years:
-		if int(i[:4]) == curent_year:
-			new_year.append(i)
 	years = [years[0]]
 	
 	masterclasses = defaultdict(defaultdict)
-	for term in years:
-		deptdict = defaultdict()
-	 	for dept in depts:
-	 		d.get('https://www.reg.uci.edu/perl/WebSoc')
-	 		a = Select(d.find_element_by_name('YearTerm'))
-	 		a.select_by_visible_text(term)
-	 		b = Select(d.find_element_by_name('Dept'))
-	 		b.select_by_value(dept)
-	 		d.find_element_by_name('YearTerm').send_keys(Keys.RETURN)
-	 		result = interpretDeptPage(BeautifulSoup(d.page_source), dept.lower())
-	 		pprint(result)
-	 		masterclasses[dept] = result
+	deptdict = defaultdict()
+	for dept in depts:
+	 	d.get('https://www.reg.uci.edu/perl/WebSoc')
+	 	a = Select(d.find_element_by_name('YearTerm'))
+	 	a.select_by_visible_text(v)
+	 	b = Select(d.find_element_by_name('Dept'))
+	 	b.select_by_value(dept)
+	 	d.find_element_by_name('YearTerm').send_keys(Keys.RETURN)
+	 	result = interpretDeptPage(BeautifulSoup(d.page_source), dept.lower())
+	 	masterclasses[dept] = result
 	 	# masterclasses[term] = dict(deptdict)
 	
 	return dict(masterclasses)
@@ -97,8 +90,9 @@ def interpretDeptPage(soup, dept):
 			string.strip()
 			contents = string.split('  ')
 			counter = 0
-			key = splitter[0] + ' ' + splitter[1]
-			pprint(deptclasses)
+			print(splitter)
+			if len(splitter)  > 1:
+				key = splitter[0] + ' ' + splitter[1]
 		elif len(string.strip()) == 0:
 			continue
 		else:
@@ -169,15 +163,16 @@ def interpretDeptPage(soup, dept):
 	#pprint(deptclasses)
 	return dict(deptclasses)
 
-
+def setup():
+	op = webdriver.ChromeOptions()
+	op.add_argument('headless');
+	d = webdriver.Chrome('/users/chaitu65c/Downloads/chromedriver', options = op)
+	return getCourseInfo(d)
+	
 
 
 
 
 if __name__ == '__main__':
-	op = webdriver.ChromeOptions()
-	op.add_argument('headless');
-	d = webdriver.Chrome('/users/chaitu65c/Downloads/chromedriver', options = op)
-	f = getCourseInfo(d)
-	pprint(f)
+	pprint(setup())
 	
