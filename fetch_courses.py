@@ -1,17 +1,18 @@
+#!/usr/bin/env python3
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
-import urllib
+from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from collections import defaultdict
-import re
+import re, os
 from pprint import pprint
 
 
 
 def getCourseInfo(d):
 	d.get('https://www.reg.uci.edu/perl/WebSoc')
-	m = urllib.urlopen('https://www.reg.uci.edu/perl/WebSoc')
+	m = urlopen('https://www.reg.uci.edu/perl/WebSoc')
 	s = BeautifulSoup(m, 'lxml')
 	main = s.body
 	div = s.find_all('select')
@@ -34,17 +35,19 @@ def getCourseInfo(d):
 	years = [years[0]]
 	
 	masterclasses = defaultdict(defaultdict)
-	deptdict = defaultdict()
-	for dept in depts:
-	 	d.get('https://www.reg.uci.edu/perl/WebSoc')
-	 	a = Select(d.find_element_by_name('YearTerm'))
-	 	a.select_by_visible_text(v)
-	 	b = Select(d.find_element_by_name('Dept'))
-	 	b.select_by_value(dept)
-	 	d.find_element_by_name('YearTerm').send_keys(Keys.RETURN)
-	 	result = interpretDeptPage(BeautifulSoup(d.page_source), dept.lower())
-	 	masterclasses[dept] = result
-	 	# masterclasses[term] = dict(deptdict)
+	for term in years:
+		deptdict = defaultdict()
+		for dept in depts:
+			d.get('https://www.reg.uci.edu/perl/WebSoc')
+			a = Select(d.find_element_by_name('YearTerm'))
+			a.select_by_visible_text(term)
+			b = Select(d.find_element_by_name('Dept'))
+			b.select_by_value(dept)
+			d.find_element_by_name('YearTerm').send_keys(Keys.RETURN)
+			result = interpretDeptPage(BeautifulSoup(d.page_source), dept.lower())
+			pprint(result)
+			masterclasses[dept] = result
+		# masterclasses[term] = dict(deptdict)
 	
 	return dict(masterclasses)
 	#div.send_keys(Keys.RETURN)
@@ -174,5 +177,10 @@ def setup():
 
 
 if __name__ == '__main__':
-	pprint(setup())
+	op = webdriver.ChromeOptions()
+	op.add_argument('headless')
+	print(os.environ['HOME'])
+	d = webdriver.Chrome(os.environ['HOME']+'/Downloads/chromedriver', options = op)
+	f = getCourseInfo(d)
+	pprint(f)
 	
